@@ -1,0 +1,89 @@
+---
+title: "Yelp Visuzalizations"
+author: "Angelica Quintana Jaimes"
+date: "3/27/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(scales)
+```
+
+Data is collected from https://www.yelp.com/dataset/documentation/main. The yelp data is from 2019, and it is centered in metropolitan areas in part of North America. It provides 6 JSON files about business, review, user, check-in, tip, and photos, where each file is composed of the main JSON object. The dataset is approximately 10GB in size, it contains strings with punctuation (quotes and commas), and it is composed of more than one type of related data.
+
+```{r}
+# loading the dataset
+yelp <- read.csv("new_yelp.csv")
+
+#structure of the dataset
+#str(yelp)
+
+#first rows of the dataset
+#head(yelp)
+```
+
+**1.  What is the average stars regarding all the restaurants on yelp in 2019?**
+
+```{r}
+ggplot(yelp, aes(stars_x)) + geom_bar(fill="blue") +
+  scale_y_continuous(labels = comma) +
+  labs(title="Distribution of Stars of Restaurants in Yelp", 
+       y = "Number of Restaurants", x = "Stars Average") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+```
+
+The data visualization illustrates that the average stars is 4.0 regarding all the restaurants added to the yelp dataset in 2019. That means most of the users give a good review in general.
+
+**2. How the star average is comparing with the highest or lowest stars in any state in North America regarding the total number of reviews?**
+
+```{r}
+yelp_5 <- yelp %>% 
+  filter(stars_x == 5.0) %>% 
+  group_by(state, name, stars_x) %>% 
+  tally() 
+
+yelp_4 <- yelp %>% 
+  filter(stars_x == 4.0) %>% 
+  group_by(state, name, stars_x) %>% 
+  tally()   
+
+yelp_1 <- yelp %>% 
+  filter(stars_x == 1.0) %>% 
+  group_by(state, name, stars_x) %>% 
+  tally()
+
+yelp_diff <- rbind(yelp_1, yelp_4, yelp_5)
+
+yelp_diff$stars_x <- as.factor(yelp_diff$stars_x)
+yelp_diff$state <- as.factor(yelp_diff$state)
+
+ggplot(yelp_diff, aes(state, n, fill=stars_x, group=stars_x)) + geom_bar(stat='identity', position='dodge') + 
+  labs(title="Distribution of Comparing the Average Stars with Lowest/Highest Stars of all Restaurants in Yelp by States", 
+       x = "States in North America", y = "Total Number of Reviews", fill = "Stars") +
+  theme(plot.title = element_text(hjust = 0.5, size = 9, face = "bold"))
+
+```
+
+The graph is showing that the state of Nevada has the most reviews on the star average (4.0), by obtaining more than 10,000 reviews of all restaurants in Yelp at that location. Also, Arizona State is the one with more reviews on the highest star (5.0) with approximately 2,500 reviews. In general, star average predominates in all the states that are representing the Yelp dataset.
+
+**3. How the length of the comments affects the rating stars category on yelp?**
+
+```{r}
+yelp_3 <- yelp %>% 
+  dplyr::select(stars_x, state, text_count)
+
+ggplot(yelp_3, aes(stars_x, text_count, fill=state)) + 
+  geom_bar(stat = "identity") + scale_fill_viridis_d() +
+  scale_y_continuous(labels = comma) +
+  labs(title = "Length of Comments vs Stars (Grouping by State)", 
+       x = "Stars(1-5)", y = "Total Number of Words") +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+```
+
+This visualization is confirming that the length of the comments is one of the reasons that users are giving star average (4.0) on yelp. It is reflected on the text or the comments they leave on the reviews. 
+
+On the other hand, the state as a categorical variable, it can give a scale related to the stars and the total number of words in all restaurants. It shows again that Nevada and Arizona states have the most length of comments by stars.
