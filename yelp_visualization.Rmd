@@ -2,13 +2,11 @@
 title: "Yelp Visuzalizations"
 author: "Angelica Quintana Jaimes"
 date: "3/27/2021"
-output:   
-  html_document:
-    keep_md: true
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.path = "README_figs/README-")
+knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
 library(ggplot2)
 library(dplyr)
